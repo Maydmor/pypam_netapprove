@@ -7,17 +7,12 @@ hardware-backed key; the PAM module **verifies the signature locally** against a
 pinned public key. If the relay is genuinely unreachable, it falls back to the local
 password — but only on a console, never over SSH.
 
-This is a Python implementation of the [Network-Approved Sudo brief](docs/), built
-per its phased plan. The brief recommends Rust for the shipped `.so`; Python (via
-`libpam-python`) is used here at the user's request — see
-[`docs/DECISIONS.md`](docs/DECISIONS.md) for the trade-off.
-
 ## The one idea everything rests on
 
 **The relay and the network are untrusted.** Approval is an Ed25519 signature over a
 canonical challenge, verified locally against a public key pinned in a root-owned
 file. A compromised relay or on-path attacker cannot forge an approval — they don't
-hold the private key. The relay is a dumb byte-mover. (Spec §2.)
+hold the private key. The relay is a dumb byte-mover.
 
 ## The three-return-code rule (spec §4)
 
@@ -29,13 +24,13 @@ hold the private key. The relay is a dumb byte-mover. (Spec §2.)
 
 **Denial ≠ outage.** Only a real outage falls back; a denial is final. Over SSH even
 an outage hard-fails (console-only fallback). Collapsing these reintroduces the
-downgrade attack (spec §3).
+downgrade attack .
 
 ## What's implemented
 
 | Phase | Scope | Status |
 |------|-------|--------|
-| 0 | Decisions & threat model | [`docs/DECISIONS.md`](docs/DECISIONS.md) |
+| 0 | Decisions & threat model |
 | 1 | Crypto core (challenge, canonical bytes, Ed25519, replay, pinned key) | ✅ `netapprove_core`, fully tested |
 | 2 | PAM module + mock signer, three-return-code logic | ✅ `netapprove_pam`, `pam_netapprove.py` |
 | 3 | REST relay + CLI approver, TLS pinning, outage mapping | ✅ `netapprove_relay`, `netapprove_approver` |
