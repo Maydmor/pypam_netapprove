@@ -1,15 +1,14 @@
-# pam-netapprove
+# pypam-netapprove
 
 > Approve `sudo` from your phone with a fingerprint — no password typed, and no trust
 > placed in the network.
 
-`pam-netapprove` is a PAM module that replaces the `sudo` password prompt with an
+`pypam-netapprove` is a PAM module that replaces the `sudo` password prompt with an
 **out-of-band, cryptographically-verified approval**. Run `sudo`, get a push on your
 phone, approve with a biometric, and you're root. If the network is down it falls
 back to the normal local password — but only on a physical console, never over SSH.
 
-It is a Python implementation of the [Network-Approved Sudo brief](docs/), built to
-its phased plan. **Status: a working, fully-tested reference / prototype.** Read
+**Status: a working, fully-tested reference / prototype.** Read
 [Security model](#security-model) and [Project status](#project-status) before
 putting it on a machine you care about.
 
@@ -56,8 +55,7 @@ relay, a swapped TLS cert, or an on-path attacker still cannot forge an approval
 they don't hold the key. The relay is reduced to a dumb byte-mover.
 
 This is the difference between "trust the network's word that it's `true`" (insecure)
-and FIDO2/WebAuthn-style push approval (secure). See [`docs/DECISIONS.md`](docs/DECISIONS.md)
-and the [brief §2](docs/) for the full reasoning.
+and FIDO2/WebAuthn-style push approval (secure).
 
 ### The three-return-code rule
 
@@ -73,7 +71,7 @@ load-bearing:
 **A denial is final; only a real outage falls back.** Otherwise an attacker who got a
 denial could just cut the network to downgrade to a password they might already know.
 And the password fallback is **console-only** — over SSH an outage hard-fails — because
-the remote attacker is the main threat. (Brief §3–§4.)
+the remote attacker is the main threat.
 
 ## How it works
 
@@ -92,7 +90,7 @@ the remote attacker is the main threat. (Brief §3–§4.)
 ```
 
 The signed message is a strict, length-prefixed, domain-separated byte encoding
-(brief §7) so the signer and verifier hash byte-identical input. The relay only ever
+so the signer and verifier hash byte-identical input. The relay only ever
 sees opaque bytes and a signature.
 
 ## Install
@@ -101,7 +99,7 @@ Requires **Python 3.10+**. The crypto core has one dependency (`cryptography`); 
 relay and client pull in `fastapi`/`requests` via extras.
 
 ```bash
-git clone <your-fork-url> pam-netapprove && cd pam-netapprove
+git clone <your-fork-url> pypam-netapprove && cd pypam-netapprove
 python -m venv .venv
 source .venv/bin/activate          # Windows: .\.venv\Scripts\activate
 pip install -e ".[relay,client,dev]"
@@ -143,7 +141,6 @@ python scripts/smoke_phase3.py         # approve→SUCCESS, deny→AUTH_ERR, out
 
 > ⚠️ **Wiring a broken module into `/etc/pam.d/sudo` can lock you out of `sudo`.**
 > Always test against a throwaway `sudotest` service with a **separate root shell
-> held open**, exactly as described in [`docs/PHASE2_TESTING.md`](docs/PHASE2_TESTING.md).
 > Only edit the real sudo stack on a canary machine, last.
 
 The module runs under [`libpam-python`](https://pam-python.sourceforge.io/). Full
