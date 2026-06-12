@@ -1,0 +1,12 @@
+# Throwaway PAM service for Phase 2 testing — install as /etc/pam.d/sudotest.
+# NEVER point this at the real sudo stack until Phase 5 on a canary machine.
+# Drive it with:  pamtester sudotest "$USER" authenticate
+#
+# The first auth line uses the EXACT control syntax the real /etc/pam.d/sudo will use:
+#   success=done            approved + signature verifies  -> PAM_SUCCESS, skip password
+#   authinfo_unavail=ignore relay outage                   -> PAM_AUTHINFO_UNAVAIL, fall through
+#   default=die             denied / bad signature         -> PAM_AUTH_ERR, fail now (no fallback)
+
+auth     [success=done authinfo_unavail=ignore default=die]  pam_python.so /usr/local/lib/netapprove/pam_netapprove.py config=/etc/netapprove/config.toml
+auth     [success=done default=die]                          pam_unix.so
+account  required                                            pam_permit.so

@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pam-netapprove"
+version = "0.1.0"
+description = "Network-approved sudo: challenge-response biometric approval as a PAM module"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "cryptography>=42.0",
+]
+
+[project.optional-dependencies]
+relay = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.29",
+    "pydantic>=2.6",
+]
+client = [
+    "requests>=2.31",
+]
+dev = [
+    "pytest>=8.0",
+    "hypothesis>=6.100",
+]
+
+[project.scripts]
+netapprove-approver = "netapprove_approver.cli:main"
+netapprove-relay = "netapprove_relay.app:run"
+netapprove-enroll = "netapprove_core.enroll:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

@@ -1,0 +1,28 @@
+# Example /etc/netapprove/config.toml — root-owned, mode 0644, chattr +i in prod.
+# All keys are optional; omitted keys use the defaults in netapprove_pam/config.py.
+
+relay_url = "https://relay.example.internal:8443"
+
+# SHA-256 fingerprint of the relay's leaf certificate, hex, lowercase, no colons.
+# Get it with:
+#   openssl x509 -in relay.crt -noout -fingerprint -sha256 | sed 's/.*=//; s/://g' | tr 'A-Z' 'a-z'
+# Leave unset ONLY in local dev (skips pinning).
+cert_fingerprint_sha256 = "0000000000000000000000000000000000000000000000000000000000000000"
+
+pin_dir = "/etc/netapprove/pinned_keys.d"
+
+validity_window_seconds = 90      # challenge freshness window (spec §0)
+approval_timeout_seconds = 60     # how long to wait for the phone
+request_timeout_seconds = 4.0     # per-HTTP-call timeout; exceeded => outage
+poll_interval_seconds = 1.5
+
+# Console-only fallback (spec §3). Keep false: over SSH an outage hard-fails
+# instead of downgrading to the local password.
+allow_ssh_fallback = false
+
+# Backend: "network" for production; "mock" for Phase 2 return-code testing.
+backend = "network"
+
+# --- Phase 2 mock backend only (ignored when backend = "network") ---
+# mock_mode = "approve"   # approve | deny | unavail
+# mock_private_key_path = "/etc/netapprove/mock_priv.b64"
